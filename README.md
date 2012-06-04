@@ -45,15 +45,15 @@ Pass an empty filter (a blank string: "") will show all items.
 
 Building on the HTML example provided in example.html:
 
-````html
+```html
 <label><input type="radio" name="oozer-filter" value="" checked="checked" /> show all</label>
-````
+```
 
 Or you can remove the filter in JavaScript using this code example:
 
-```JavaScript
+```javascript
 $('#oozer-list').oozer('filter', '');
-````
+```
 
 ## Options
 
@@ -110,50 +110,50 @@ When filter is a string, Oozer will check to see if the filter phrase (used late
 
 E.g. Assume you have the following data:
 
-````html
+```html
 <article data-oozer-filter="one three"> ... </article>
 <article data-oozer-filter="one four"> ... </article>
 <article data-oozer-filter="two five"> ... </article>
 <article data-oozer-filter="two six"> ... </article>
-````
+```
 
 Filter for "one":
 
-````html
+```html
 <article data-oozer-filter="one three"> ... </article>
 <article data-oozer-filter="one four"> ... </article>
-````
+```
 
 Filter for "two":
 
-````html
+```html
 <article data-oozer-filter="two five"> ... </article>
 <article data-oozer-filter="two six"> ... </article>
-````
+```
 
 Filter for "three":
 
-````html
+```html
 <article data-oozer-filter="one three"> ... </article>
-````
+```
 
 Filter for "four":
 
-````html
+```html
 <article data-oozer-filter="one four"> ... </article>
-````
+```
 
 Filter for "five":
 
-````html
+```html
 <article data-oozer-filter="two five"> ... </article>
-````
+```
 
 Filter for "six":
 
-````html
+```html
 <article data-oozer-filter="two six"> ... </article>
-````
+```
 
 h4. function(element):boolean
 
