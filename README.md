@@ -159,11 +159,11 @@ h4. function(element):boolean
 
 Parameters:
 
-# element: the element which you will decide whether to show or not
+* element: the element which you will decide whether to show or not
 
 Returns:
 
-# boolean: true/false depending on whether you want to show the item or not
+* boolean: true/false depending on whether you want to show the item or not
 
 When you provide a function as a filter, the first parameter of the callback will be an object. You can run custom tests on your object and return true or false to determine whether or not to show the item after the rearrangement.
 
