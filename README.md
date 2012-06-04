@@ -1,8 +1,8 @@
-h1. jquery.oozer.js
+# jquery.oozer.js
 
-h2. Project Details
+## Project Details
 
-h3. Licence
+### Licence
 
 Copyright (C) 2012, "Bashkim Isai":http://www.bashkim.com.au
 
@@ -15,17 +15,17 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-h3. Contributors
+### Contributors
 
 * @bashaus
 
 If you fork this project and create a pull request, don't forget to add your name to the end of list above.
 
-h3. Description
+### Description
 
 Oozer is a way to visually rearrange objects and lists on a page. The project was inspired by "jquery.quicksand.js":https://github.com/razorjack/quicksand/ by @razorjack.
 
-h3. Difference between Quicksand and Oozer
+### Difference between Quicksand and Oozer
 
 Quicksand is a great project and provided the inspiration behind this script; however there were some technical limitations with quicksand that I wanted to overcome. 
 
@@ -33,13 +33,13 @@ The core functionality of the Quicksand library is that it "replaces one collect
 
 While Quicksand can dynamically insert new elements into the list through Ajax calls, Oozer assumes that you have all the elements already in the DOM ready for sorting. Oozer takes this approach so that attached events are not lost when you rearrange the list. This allows you to retain attached JavaScript functions and events on your DOM objects.
 
-h2. Usage
+## Usage
 
 For a working example, see example.html
 
-h2. Functionality
+## Functionality
 
-h3. Show all items
+### Show all items
 
 Pass an empty filter (a blank string: "") will show all items.
 
@@ -55,51 +55,51 @@ Or you can remove the filter in JavaScript using this code example:
 $('#oozer-list').oozer('filter', '');
 ````
 
-h2. Options
+## Options
 
-h3. elementSelector
+### elementSelector
 
 Type: string (selector)
 Default: "> *"
 
 Allows you to select particular elements that you want Oozer to handle. By default, Oozer will select all child elements of the container object. Usually you will not need to change this.
 
-h3. animationSpeed
+### animationSpeed
 
 Type: integer (in milliseconds)
 Default: 500 (half a second)
 
 The speed in which the oozing (or shuffling) will occur. This includes the speed for rearranging items in the list.
 
-h3. animationEasing
+### animationEasing
 
 Type: string
 Default: null
 
 The style of easing that you want to use for the shuffling animation. See notes on easing in the Extensions section below.
 
-h3. animationScaling
+### animationScaling
 
 Type: boolean
 Default: true
 
 Whether you want to try scaling as well. Will only work when you have a scaling library for jQuery included in your script. See notes on scaling in the Extensions section below.
 
-h3. resizeSpeed
+### resizeSpeed
 
 Type: integer (in milliseconds)
 Default: 500 (half a second)
 
 The speed at which the containing element is animated to resize to its new position.
 
-h3. resizeEasing
+### resizeEasing
 
 Type: string
 Default: null
 
 The style of easing that you want to use for the container resize. See notes on easing in the Extensions section below.
 
-h3. filter
+### filter
 
 Type: string or function(element):boolean
 Default: null
@@ -167,7 +167,7 @@ Returns:
 
 When you provide a function as a filter, the first parameter of the callback will be an object. You can run custom tests on your object and return true or false to determine whether or not to show the item after the rearrangement.
 
-h3. sort
+### sort
 
 Type: function(a,b):integer
 Default: function(a, b) { return parseInt($(a).attr('data-'+NS+'-i')) - parseInt($(b).attr('data-'+NS+'-i')); }
@@ -176,17 +176,17 @@ Uses the Array.sort() function callback to allow you to order items. Despite the
 
 For more information, see "JavaScript Kit tutorial on Sorting":http://www.javascriptkit.com/javatutors/arraysort.shtml.
 
-h2. Optional extensions
+## Optional extensions
 
-h3. Easing
+### Easing
 
 You can create smooth animations for Oozer by including an easing library. You can find "a great easing library at GSGD":http://gsgd.co.uk/sandbox/jquery/easing/.
 
-h3. Scaling
+### Scaling
 
 To zoom in/out your items when oozing, you can use a scaling effect as well as an opacity effect. In order to use scaling, you must install a scaling library for jQuery. You can find "a great scaling library at zachstronaut.com":http://www.zachstronaut.com/posts/2009/08/07/jquery-animate-css-rotate-scale.html.
 
-h2. Tips
+## Tips
 
 * Make sure all of your items have the same width and height. Keeping consistent and defined dimensions makes animations smoother and causes less ambiguity when displaying information.
 * You should set a width plus a border or background color for your list container; it makes for nicer animations.
