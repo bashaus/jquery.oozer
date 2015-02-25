@@ -1,10 +1,8 @@
 # jquery.oozer.js
 
-Oozer is a way to visually rearrange objects and lists on a page. The project was inspired by "jquery.quicksand.js":https://github.com/razorjack/quicksand/ by @razorjack.
+Oozer is a way to visually rearrange objects and lists on a page.
 
-Quicksand is a great project and provided the inspiration behind this script; however there were some technical limitations with quicksand that I wanted to overcome. 
-
-The core functionality of the Quicksand library is that it "replaces one collection of items with another". This differs from Oozer which toggles visibility and sorts information in a list depending on a filter.
+The project was inspired by [jquery.quicksand.js](https://github.com/razorjack/quicksand/) by [@razorjack](https://github.com/razorjack/). Quicksand is a great project and provided the inspiration behind this script; however there were some technical limitations with quicksand that I wanted to overcome. The core functionality of the Quicksand library is that it "replaces one collection of items with another". This differs from Oozer which toggles visibility and sorts information in a list depending on a filter.
 
 While Quicksand can dynamically insert new elements into the list through Ajax calls, Oozer assumes that you have all the elements already in the DOM ready for sorting. Oozer takes this approach so that attached events are not lost when you rearrange the list. This allows you to retain attached JavaScript functions and events on your DOM objects.
 
@@ -149,17 +147,17 @@ When you provide a function as a filter, the first parameter of the callback wil
 
 Uses the Array.sort() function callback to allow you to order items. Despite the fact Oozer reorders items in the DOM, by default Oozer will try and keep everything in the original order that you arranged it in HTML. This is done through the HTML5 attribute "data-oozer-id" which is set with the object is initialised.
 
-For more information, see "JavaScript Kit tutorial on Sorting":http://www.javascriptkit.com/javatutors/arraysort.shtml.
+For more information, see [JavaScript Kit tutorial on Sorting](http://www.javascriptkit.com/javatutors/arraysort.shtml).
 
 ## Optional extensions
 
 ### Easing
 
-You can create smooth animations for Oozer by including an easing library. You can find "a great easing library at GSGD":http://gsgd.co.uk/sandbox/jquery/easing/.
+You can create smooth animations for Oozer by including an easing library. You can find [a great easing library at GSGD](http://gsgd.co.uk/sandbox/jquery/easing/).
 
 ### Scaling
 
-To zoom in/out your items when oozing, you can use a scaling effect as well as an opacity effect. In order to use scaling, you must install a scaling library for jQuery. You can find "a great scaling library at zachstronaut.com":http://www.zachstronaut.com/posts/2009/08/07/jquery-animate-css-rotate-scale.html.
+To zoom in/out your items when oozing, you can use a scaling effect as well as an opacity effect. In order to use scaling, you must install a scaling library for jQuery. You can find [a great scaling library at zachstronaut.com](http://www.zachstronaut.com/posts/2009/08/07/jquery-animate-css-rotate-scale.html).
 
 ## Tips
 
@@ -169,7 +167,7 @@ To zoom in/out your items when oozing, you can use a scaling effect as well as a
 
 ### Licence
 
-Copyright (C) 2012, "Bashkim Isai":http://www.bashkim.com.au
+Copyright (C) 2011-2015, [Bashkim Isai](http://www.bashkim.com.au)
 
 This script is distributed under the MIT licence.
 
