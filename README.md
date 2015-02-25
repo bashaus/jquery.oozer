@@ -1,31 +1,6 @@
 # jquery.oozer.js
 
-## Project Details
-
-### Licence
-
-Copyright (C) 2012, "Bashkim Isai":http://www.bashkim.com.au
-
-This script is distributed under the MIT licence.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-### Contributors
-
-* @bashaus
-
-If you fork this project and create a pull request, don't forget to add your name to the end of list above.
-
-### Description
-
 Oozer is a way to visually rearrange objects and lists on a page. The project was inspired by "jquery.quicksand.js":https://github.com/razorjack/quicksand/ by @razorjack.
-
-### Difference between Quicksand and Oozer
 
 Quicksand is a great project and provided the inspiration behind this script; however there were some technical limitations with quicksand that I wanted to overcome. 
 
@@ -59,52 +34,52 @@ $('#oozer-list').oozer('filter', '');
 
 ### elementSelector
 
-Type: string (selector)
-Default: "> *"
+* Type: string (selector)
+* Default: "> *"
 
 Allows you to select particular elements that you want Oozer to handle. By default, Oozer will select all child elements of the container object. Usually you will not need to change this.
 
 ### animationSpeed
 
-Type: integer (in milliseconds)
-Default: 500 (half a second)
+* Type: integer (in milliseconds)
+* Default: 500 (half a second)
 
 The speed in which the oozing (or shuffling) will occur. This includes the speed for rearranging items in the list.
 
 ### animationEasing
 
-Type: string
-Default: null
+* Type: string
+* Default: null
 
 The style of easing that you want to use for the shuffling animation. See notes on easing in the Extensions section below.
 
 ### animationScaling
 
-Type: boolean
-Default: true
+* Type: boolean
+* Default: true
 
 Whether you want to try scaling as well. Will only work when you have a scaling library for jQuery included in your script. See notes on scaling in the Extensions section below.
 
 ### resizeSpeed
 
-Type: integer (in milliseconds)
-Default: 500 (half a second)
+* Type: integer (in milliseconds)
+* Default: 500 (half a second)
 
 The speed at which the containing element is animated to resize to its new position.
 
 ### resizeEasing
 
-Type: string
-Default: null
+* Type: string
+* Default: null
 
 The style of easing that you want to use for the container resize. See notes on easing in the Extensions section below.
 
 ### filter
 
-Type: string or function(element):boolean
-Default: null
+* Type: string or function(element):boolean
+* Default: null
 
-h4. string
+#### string
 
 When filter is a string, Oozer will check to see if the filter phrase (used later) is contained in whole in the attribute.
 
@@ -155,7 +130,7 @@ Filter for "six":
 <article data-oozer-filter="two six"> ... </article>
 ```
 
-h4. function(element):boolean
+#### function(element):boolean
 
 Parameters:
 
@@ -169,8 +144,8 @@ When you provide a function as a filter, the first parameter of the callback wil
 
 ### sort
 
-Type: function(a,b):integer
-Default: function(a, b) { return parseInt($(a).attr('data-'+NS+'-i')) - parseInt($(b).attr('data-'+NS+'-i')); }
+* Type: function(a,b):integer
+* Default: function(a, b) { return parseInt($(a).attr('data-'+NS+'-i')) - parseInt($(b).attr('data-'+NS+'-i')); }
 
 Uses the Array.sort() function callback to allow you to order items. Despite the fact Oozer reorders items in the DOM, by default Oozer will try and keep everything in the original order that you arranged it in HTML. This is done through the HTML5 attribute "data-oozer-id" which is set with the object is initialised.
 
@@ -190,3 +165,23 @@ To zoom in/out your items when oozing, you can use a scaling effect as well as a
 
 * Make sure all of your items have the same width and height. Keeping consistent and defined dimensions makes animations smoother and causes less ambiguity when displaying information.
 * You should set a width plus a border or background color for your list container; it makes for nicer animations.
+
+
+### Licence
+
+Copyright (C) 2012, "Bashkim Isai":http://www.bashkim.com.au
+
+This script is distributed under the MIT licence.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+### Contributors
+
+* @bashaus
+
+If you fork this project and create a pull request, don't forget to add your name to the end of list above.
