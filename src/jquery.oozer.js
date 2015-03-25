@@ -186,9 +186,9 @@
          */
         
         // Now do the animations
-        var $fxContainer = $({});
+var animBeforeHeight = function(){
+        var deferred = new $.Deferred();
 
-$fxContainer.queue(function(done){
         $.each(transitionElements, function(i, transitionElement) {
             if (transitionElement.start) {
                 transitionElement.$target.css({
@@ -204,14 +204,16 @@ $fxContainer.queue(function(done){
                 {height : heightCease + "px"}, 
                 options.resizeSpeed, 
                 options.resizeEasing, 
-                done
+                deferred.resolve
             );
         } else {
-            done();
+            deferred.resolve();
         }
-});
 
-$fxContainer.queue(function(done){
+        return deferred.promise();
+}
+
+var animShuffle = function(){
         var deferredObjects = [];
 
         $.each(transitionElements, function(i, transitionElement) {
@@ -297,38 +299,38 @@ $fxContainer.queue(function(done){
             }
         });
 
-        $.when
-            .apply($, deferredObjects)
-            .done(function() { 
-                done();
-            });
-});
+        return $.when.apply($, deferredObjects);
+};
         
         /**
          * Step 10.
          * Animate the container the correct height
          */
-        
-$fxContainer.queue(function(done){
+
+var animAfterHeight = function() {
+        var deferred = new $.Deferred();
+
         if (heightStart > heightCease) {
             $this.animate(
                 {height: heightCease + "px"}, 
                 options.resizeSpeed, 
                 options.resizeEasing,
-                done
+                deferred.resolve
             );
+        } else {
+            deferred.resolve();
         }
-        
-        done();
-});
+
+        return deferred.promise();
+};
 
         /**
          * Step 11.
          * Settle the elements into their place after all animations are complete
          * and clean up any outstanding information
          */
-        
-$fxContainer.queue(function(done){
+
+var animSettle = function() {
         $.each(transitionElements, function(i, transitionElement) {
             transitionElement.$target.css({
                 position: '',
@@ -338,9 +340,13 @@ $fxContainer.queue(function(done){
         });
 
         $this.css({height: ''});
+};
 
-        done();
-});
+        $.when(true)
+            .then(animBeforeHeight)
+            .then(animShuffle)
+            .then(animAfterHeight)
+            .always(animSettle);
     }
 
     /* Structs */
@@ -350,7 +356,7 @@ $fxContainer.queue(function(done){
         this.start = null;
         this.cease = null;
     }
-    
+
     /* Helpers */
 
     function containsWord(haystack, needle) {
