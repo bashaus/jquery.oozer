@@ -1,0 +1,67 @@
+html { font-family: Georgia; }
+
+.colors {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	border: solid 1px #CCC;
+	width: 600px;
+}
+
+/* clearfix */
+.colors:after {
+	content: ' ';
+	display: block;
+	clear: both;
+	visibility: hidden;
+}
+
+.colors li {
+	list-style-type: none;
+	width: 130px;
+	float: left;
+	line-height: 20px;
+	padding: 10px;
+	text-align: center;
+}
+
+.colors li:before {
+	content: ' ';
+	display: block;
+	width: 20px;
+	height: 20px;
+	margin: 0 auto;
+	-webkit-border-radius: 10px;
+	   -moz-border-radius: 10px;
+	        border-radius: 10px;
+}
+
+.colors li.maraschino:before { background-color: #ef3e2e; }
+.colors li.cayenne:before    { background-color: #ad233c; }
+.colors li.maroon:before     { background-color: #7b3037; }
+.colors li.plum:before       { background-color: #854993; }
+.colors li.eggplant:before   { background-color: #663c84; }
+.colors li.grape:before      { background-color: #802c8c; }
+.colors li.orchid:before     { background-color: #a56695; }
+.colors li.lavender:before   { background-color: #b39dcc; }
+.colors li.carnation:before  { background-color: #f587a0; }
+.colors li.strawberry:before { background-color: #cf1779; }
+.colors li.bubblegum:before  { background-color: #ee88b0; }
+.colors li.magenta:before    { background-color: #f0038f; }
+.colors li.salmon:before     { background-color: #ed7c78; }
+.colors li.tangerine:before  { background-color: #f27825; }
+.colors li.cantaloupe:before { background-color: #f59f70; }
+.colors li.banana:before     { background-color: #f2d106; }
+.colors li.lemon:before      { background-color: #f1e41a; }
+.colors li.honeydew:before   { background-color: #ccdc5f; }
+.colors li.lime:before       { background-color: #66be44; }
+.colors li.spring:before     { background-color: #14ad52; }
+.colors li.clover:before     { background-color: #089062; }
+.colors li.fern:before       { background-color: #006b4d; }
+.colors li.moss:before       { background-color: #3da246; }
+.colors li.flora:before      { background-color: #a8cb33; }
+.colors li.seam-foam:before  { background-color: #69baa9; }
+.colors li.spindrift:before  { background-color: #79cfc6; }
+.colors li.teal:before       { background-color: #0389ac; }
+.colors li.sky:before        { background-color: #0d8bc6; }
+.colors li.turquoise:before  { background-color: #00b2b5; }

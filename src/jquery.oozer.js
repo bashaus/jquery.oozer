@@ -1,32 +1,29 @@
-/**
- * jQuery.Oozer
- * Copyright (c) Bashkim Isai, 2011
+/*!
+ * jquery.oozer.js
+ * https://github.com/bashaus/jquery.oozer.js
  */
 
 (function($) {
-    var NS = 'oozer';
+    var NS = 'oozer',
+        DEFAULT_OPTIONS = {
+            elementSelector : '> *',
+            animationSpeed  : 500,
+            animationEasing : null,
+            resizeSpeed     : 500,
+            resizeEasing    : null,
+            filter          : null,
+            sort            : function(a, b) {
+                return parseInt($(a).attr('data-'+NS+'-i')) - parseInt($(b).attr('data-'+NS+'-i'));
+            }
+        };
 
     var methods = {};
     methods.init = function(options) {
         return this.each(function() {
             var $this = $(this);
-            
+
             // Set fallback-options
-            options = jQuery.extend({
-                elementSelector : '> *',
-                animationSpeed  : 500,
-                animationEasing : null,
-                animationScaling: true,
-                resizeSpeed     : 500,
-                resizeEasing    : null,
-                filter          : null,
-                sort            : function(a, b) { return parseInt($(a).attr('data-'+NS+'-i')) - parseInt($(b).attr('data-'+NS+'-i')); }
-            }, options);
-            
-            // If the browser is incompatible, don't use browser scaling
-            if ($.browser.msie || $.browser.mozilla || (typeof($.fn.scale) == 'undefined')) {
-                options.animationScaling = false;
-            }
+            options = jQuery.extend({}, DEFAULT_OPTIONS, options);
 
             // Remember the order
             var $elements = $(options.elementSelector, $this);
@@ -36,7 +33,7 @@
             });
 
             $this.data(NS, options);
-        } );
+        });
     }
     
     methods.filter = function(filterFor) {
@@ -79,7 +76,7 @@
 
             $element.data('positionLayout.'+NS, $element.css('position'));
             $element.data('positionStart.'+NS, positionStart);
-        } );
+        });
 
         /**
          * Step 2. 
@@ -100,11 +97,9 @@
                     var $this = $(this);
                     if (filterFor == "") {
                         elementShow = true;
-                    }
-                    else if ($element.attr(options.filter).containsWord(filterFor)) {
+                    } else if ($element.attr(options.filter).containsWord(filterFor)) {
                         elementShow = true;
-                    }
-                    else {
+                    } else {
                         elementShow = false;
                     }
 
@@ -113,19 +108,10 @@
 
             if (elementShow) {
                 $element.show();
-                
-                if (options.animationScaling) {
-                    $element.scale(1);
-                }
-            }
-            else {
+            } else {
                 $element.hide();
-
-                if (options.animationScaling) {
-                    $element.scale(0);
-                }
             }
-        } );
+        });
 
         // Sort the elements (helps for nth-child)
         switch (typeof options.sort) {
@@ -160,7 +146,7 @@
             }
             
             $element.data('positionCease.'+NS, positionCease);
-        } );
+        });
         
         // We also want to store the cease height of the container
         var heightCease = $this.height();
@@ -180,20 +166,11 @@
             $element.appendTo($this);
 
             if (positionStart) {
-                if (options.animationScaling) {
-                    $element.scale(1);
-                }
-
                 $element.css({opacity: 1}).show();
-            }
-            else {
-                if (options.animationScaling) {
-                    $element.scale(0);
-                }
-
+            } else {
                 $element.css({opacity: 0}).hide();
             }
-        } );
+        });
 
         /**
          * Step 5. 
@@ -223,8 +200,7 @@ $fxContainer.queue(function(done){
                 options.resizeEasing, 
                 done
             );
-        }
-        else {
+        } else {
             done();
         }
 });
@@ -244,8 +220,8 @@ $fxContainer.queue(function(done){
             if (!positionStart && positionCease) {
                 $element.css({top: positionCease.top, left: positionCease.left}).show();
                 
-                $element.animate (
-                    (options.animationScaling) ? {scale : 1, opacity : 1} : {opacity : 1},
+                $element.animate(
+                    {opacity : 1},
                     options.animationSpeed, 
                     options.animationEasing,
                     animate_item_callback
@@ -259,7 +235,7 @@ $fxContainer.queue(function(done){
                 $element.css({top: positionStart.top, left: positionStart.left});
                 
                 $element.animate(
-                    (options.animationScaling) ? {scale : 0, opacity: 0} : {opacity : 0},
+                    {opacity : 0},
                     options.animationSpeed, 
                     options.animationEasing,
                     function() {
@@ -303,7 +279,7 @@ $fxContainer.queue(function(done){
             }
         });
 
-        function animate_item_callback () {
+        function animate_item_callback() {
             --contentCount;
 
             if (contentCount == 0) {
@@ -358,7 +334,7 @@ $fxContainer.queue(function(done){
         } else if (typeof method === 'object' || !method) {
             return methods.init.apply(this, arguments);
         } else {
-            $.error ('jQuery.' + NS + ': method ' +  method + ' does not exist');
+            $.error('jQuery.' + NS + ': method ' +  method + ' does not exist');
         }
     };
 })(jQuery);

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Example: jquery.oozer.js</title>
+<link rel="stylesheet" type="text/css" href="assets/style.css" />
+</head>
+<body>
+<form method="get">
+    <fieldset id="oozer-filters">
+        <legend>Filter colors</legend>
+        <label><input type="radio" name="oozer-filter" value="" checked="checked" /> show all</label>
+        <label><input type="radio" name="oozer-filter" value="red" /> red</label>
+        <label><input type="radio" name="oozer-filter" value="purple" /> purple</label>
+        <label><input type="radio" name="oozer-filter" value="pink" /> pink</label>
+        <label><input type="radio" name="oozer-filter" value="orange" /> orange</label>
+        <label><input type="radio" name="oozer-filter" value="yellow" /> yellow</label>
+        <label><input type="radio" name="oozer-filter" value="green" /> green</label>
+        <label><input type="radio" name="oozer-filter" value="blue" /> blue</label>
+    </fieldset>
+</form>
+
+<h2>Colors</h2>
+<ul id="oozer-list" class="colors">
+    <li data-oozer-filter="red" class="maraschino">Maraschino</li>
+    <li data-oozer-filter="red" class="cayenne">Cayenne</li>
+    <li data-oozer-filter="purple" class="maroon">Maroon</li>
+    <li data-oozer-filter="purple" class="plum">Plum</li>
+    <li data-oozer-filter="purple" class="eggplant">Eggplant</li>
+    <li data-oozer-filter="purple" class="grape">Grape</li>
+    <li data-oozer-filter="purple" class="orchid">Orchid</li>
+    <li data-oozer-filter="purple" class="lavender">Lavender</li>
+    <li data-oozer-filter="pink" class="carnation">Carnation</li>
+    <li data-oozer-filter="pink" class="strawberry">Strawberry</li>
+    <li data-oozer-filter="pink" class="bubblegum">Bubblegum</li>
+    <li data-oozer-filter="pink" class="magenta">Magenta</li>
+    <li data-oozer-filter="pink" class="salmon">Salmon</li>
+    <li data-oozer-filter="orange" class="tangerine">Tangerine</li>
+    <li data-oozer-filter="orange" class="cantaloupe">Cantaloupe</li>
+    <li data-oozer-filter="yellow" class="banana">Banana</li>
+    <li data-oozer-filter="yellow" class="lemon">Lemon</li>
+    <li data-oozer-filter="green" class="honeydew">Honeydew</li>
+    <li data-oozer-filter="green" class="lime">Lime</li>
+    <li data-oozer-filter="green" class="spring">Spring</li>
+    <li data-oozer-filter="green" class="clover">Clover</li>
+    <li data-oozer-filter="green" class="fern">Fern</li>
+    <li data-oozer-filter="green" class="moss">Moss</li>
+    <li data-oozer-filter="green" class="flora">Flora</li>
+    <li data-oozer-filter="green" class="seam-foam">Seam Foam</li>
+    <li data-oozer-filter="blue" class="spindrift">Spindrift</li>
+    <li data-oozer-filter="blue" class="teal">Teal</li>
+    <li data-oozer-filter="blue" class="sky">Sky</li>
+    <li data-oozer-filter="blue" class="turquoise">Turquoise</li>
+</ul>
+
+<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script type="text/javascript" src="../src/jquery.oozer.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#oozer-filters input[name="oozer-filter"]').click(function() {
+        $("#oozer-list").oozer('filter', $(this).val());
+    });
+
+    $('#oozer-list').oozer({
+        filter: 'data-oozer-filter'
+    });
+});
+</script>
+</body>
+</html>

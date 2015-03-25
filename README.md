@@ -1,6 +1,6 @@
 # jquery.oozer.js
 
-Oozer is a way to visually rearrange objects and lists on a page.
+Oozer is a way to visually rearrange list items on a page.
 
 The project was inspired by [jquery.quicksand.js](https://github.com/razorjack/quicksand/) by [@razorjack](https://github.com/razorjack/). Quicksand is a great project and provided the inspiration behind this script; however there were some technical limitations with quicksand that I wanted to overcome. The core functionality of the Quicksand library is that it "replaces one collection of items with another". This differs from Oozer which toggles visibility and sorts information in a list depending on a filter.
 
@@ -180,6 +180,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ### Contributors
 
-* @bashaus
+- @bashaus -- [Bashkim Isai](http://www.bashkim.com.au/)
 
-If you fork this project and create a pull request, don't forget to add your name to the end of list above.
+If you fork this project and create a pull request add your GitHub username, your full name and website to the end of list above.

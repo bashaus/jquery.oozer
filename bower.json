@@ -1,0 +1,23 @@
+{
+  "name": "jquery.oozer.js",
+  "main": "src/jquery.oozer.js",
+  "version": "0.1.0",
+  "homepage": "https://github.com/bashaus/jquery.oozer.js",
+  "authors": [
+    "Bashkim Isai"
+  ],
+  "description": "Visually rearrange list items on a page.",
+  "keywords": [
+    "jquery",
+    "list",
+    "rearrange"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
