@@ -1,0 +1,13 @@
+@import url('all.css');
+
+/* clearfix */
+.colors:after {
+    content: ' ';
+    display: block;
+    clear: both;
+    visibility: hidden;
+}
+
+.colors li {
+    float: left;
+}
