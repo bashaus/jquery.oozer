@@ -1,6 +1,6 @@
 /*!
- * jquery.oozer.js
- * https://github.com/bashaus/jquery.oozer.js
+ * jquery.oozer
+ * https://github.com/bashaus/jquery.oozer
  */
 
 (function ($) {

@@ -1,8 +1,8 @@
 {
-  "name": "jquery.oozer.js",
+  "name": "jquery.oozer",
   "main": "src/jquery.oozer.js",
-  "version": "0.1.0",
-  "homepage": "https://github.com/bashaus/jquery.oozer.js",
+  "version": "0.0.2",
+  "homepage": "https://github.com/bashaus/jquery.oozer",
   "authors": [
     "Bashkim Isai"
   ],
