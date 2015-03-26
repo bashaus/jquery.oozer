@@ -15,12 +15,12 @@
             resizeSpeed     : 500,
             resizeEasing    : null,
             filter          : null,
-            sort            : function(a, b) {
-                return parseInt($(a).attr('data-'+NS+'-i')) - parseInt($(b).attr('data-'+NS+'-i'));
+            sort            : function($a, $b) {
+                return parseInt($a.attr('data-'+NS+'-i')) - parseInt($b.attr('data-'+NS+'-i'));
             }
-        };
+        },
+        methods = {};
 
-    var methods = {};
     methods.init = function(options) {
         return this.each(function() {
             var $this = $(this);
@@ -31,8 +31,7 @@
             // Remember the order
             var $elements = $(options.elementSelector, $this);
             $elements.each(function(i){
-                var $element = $(this);
-                $element.attr('data-'+NS+'-i', i);
+                $(this).attr('data-'+NS+'-i', i);
             });
 
             $this.data(NS, options);
@@ -40,17 +39,14 @@
     }
     
     methods.filter = function(filterFor) {
-        var $this = $(this);
-        var options = $this.data(NS);
-
-        // Store the Start Height
-        var heightStart = $this.height();
-
-        // Then allow it to be fluid so set it to auto
-        $this.height('auto');
-
-        // Elements
-        var transitionElements = [];
+        var $container = $(this),
+            options = $container.data(NS),
+            heightStart = $container.height(),    // Store the Start Height
+            heightCease = 0,
+            transitionElements = [];         // Elements
+        
+        // Allow the container to be fluid so set it to auto
+        $container.height('auto');
 
         /**
          * Step 1.
@@ -58,12 +54,15 @@
          */
 
         // $elements.unbind(E_TRANSITION_END);
+        if (typeof options.$queue !== "undefined") {
+            options.$queue.stop(true, true);
+        }
 
         /**
          * Step 2.
          * Store the elements in the transitionElements array
          */
-        $(options.elementSelector, $this).each(function() {
+        $(options.elementSelector, $container).each(function() {
             transitionElements.push(new TransitionElement($(this)));
         });
 
@@ -91,11 +90,11 @@
          */
         
         $.each(transitionElements, function(i, transitionElement) {
-            var elementShow = null;
+            var elementShow = false;
 
             switch (typeof options.filter) {
                 case "function":
-                    elementShow = options.filter.call($this, transitionElement.$target);
+                    elementShow = options.filter.call($container, transitionElement.$target);
                     break;
 
                 case "string":
@@ -103,18 +102,12 @@
                         elementShow = true;
                     } else if (containsWord(transitionElement.$target.attr(options.filter), filterFor)) {
                         elementShow = true;
-                    } else {
-                        elementShow = false;
                     }
 
                     break;
             }
 
-            if (elementShow) {
-                transitionElement.$target.show();
-            } else {
-                transitionElement.$target.hide();
-            }
+            transitionElement.$target[elementShow ? 'show' : 'hide']();
         });
 
         /**
@@ -130,13 +123,13 @@
 
             // Reattach all items to the DOM (to make the ordered)
             $.each(transitionElements, function(i, transitionElement){
-                transitionElement.$target.detach().appendTo($this);
+                transitionElement.$target.detach().appendTo($container);
             });
 
             // Add all hidden items to the end
             $.each(transitionElements, function(i, transitionElement){
                 if (transitionElement.$target.is(':hidden')) {
-                    transitionElement.$target.detach().appendTo($this);
+                    transitionElement.$target.detach().appendTo($container);
                 }
             });
         }
@@ -145,7 +138,6 @@
          * Step 7.
          * Find out where the new locations are for visible items
          */
-
 
         $.each(transitionElements, function(i, transitionElement) {
             var positionCease = null;
@@ -158,10 +150,10 @@
         });
         
         // We also want to store the cease height of the container
-        var heightCease = $this.height();
+        heightCease = $container.height();
 
         // And reset it to its original size
-        $this.height(heightStart);
+        $container.height(heightStart);
         
         /**
          * Step 8.
@@ -184,11 +176,10 @@
          * CASE 3: POSITION to POSITION - Shuffle the item to a new location
          * CASE 4: HIDDEN to HIDDEN     - Do nothing
          */
-        
-        // Now do the animations
-var animBeforeHeight = function(){
-        var deferred = new $.Deferred();
 
+        options.$queue = $({});
+
+options.$queue.queue(function(resolve){
         $.each(transitionElements, function(i, transitionElement) {
             if (transitionElement.start) {
                 transitionElement.$target.css({
@@ -200,20 +191,18 @@ var animBeforeHeight = function(){
         });
 
         if (heightCease > heightStart) {
-            $this.animate(
+            $container.animate(
                 {height : heightCease + "px"}, 
                 options.resizeSpeed, 
                 options.resizeEasing, 
-                deferred.resolve
+                resolve
             );
         } else {
-            deferred.resolve();
+            resolve();
         }
+});
 
-        return deferred.promise();
-}
-
-var animShuffle = function(){
+options.$queue.queue(function(resolve){
         var deferredObjects = [];
 
         $.each(transitionElements, function(i, transitionElement) {
@@ -252,7 +241,7 @@ var animShuffle = function(){
                     options.animationSpeed, 
                     options.animationEasing,
                     function() {
-                        transitionElement.$target.detach().appendTo($this);
+                        transitionElement.$target.detach().appendTo($container);
                         
                         $(this).hide();
                         deferred.resolve();
@@ -289,7 +278,7 @@ var animShuffle = function(){
                     options.animationSpeed, 
                     options.animationEasing, 
                     function() {
-                        transitionElement.$target.detach().appendTo($this);
+                        transitionElement.$target.detach().appendTo($container);
                         
                         deferred.resolve();
                     }
@@ -299,30 +288,27 @@ var animShuffle = function(){
             }
         });
 
-        return $.when.apply($, deferredObjects);
-};
+        return $.when.apply($, deferredObjects)
+            .done(resolve);
+});
         
         /**
          * Step 10.
          * Animate the container the correct height
          */
 
-var animAfterHeight = function() {
-        var deferred = new $.Deferred();
-
+options.$queue.queue(function(resolve) {
         if (heightStart > heightCease) {
-            $this.animate(
+            $container.animate(
                 {height: heightCease + "px"}, 
                 options.resizeSpeed, 
                 options.resizeEasing,
-                deferred.resolve
+                resolve
             );
         } else {
-            deferred.resolve();
+            resolve();
         }
-
-        return deferred.promise();
-};
+});
 
         /**
          * Step 11.
@@ -330,23 +316,20 @@ var animAfterHeight = function() {
          * and clean up any outstanding information
          */
 
-var animSettle = function() {
+options.$queue.promise().always(function() {
         $.each(transitionElements, function(i, transitionElement) {
-            transitionElement.$target.css({
+            transitionElement.$target.stop(true, true).css({
                 position: '',
                 top: '',
-                left: ''
+                left: '',
+                opacity: ''
             });
         });
 
-        $this.css({height: ''});
-};
+        $container.stop(true, true).css({height: ''});
+});
 
-        $.when(true)
-            .then(animBeforeHeight)
-            .then(animShuffle)
-            .then(animAfterHeight)
-            .always(animSettle);
+        $container.data(NS, options);
     }
 
     /* Structs */
