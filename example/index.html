@@ -64,13 +64,18 @@
 <script type="text/javascript" src="../src/jquery.oozer.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-    $('#oozer-filters input[name="oozer-filter"]').click(function() {
+    $('input[name="oozer-filter"]').click(function() {
         $("#oozer-list").oozer('filter', $(this).val());
     });
 
-    $('#oozer-list').oozer({
-        filter: 'data-oozer-filter'
-    });
+    $('#oozer-list').oozer()
+        .bind('beforeFilter.oozer', function(e) {
+            $('input[name="oozer-filter"]').each(function() { 
+                if (this.getAttribute('value') == e.oozer.filterFor) {
+                    this.checked = true;
+                }
+            });
+        });
 });
 </script>
 </body>

@@ -3,7 +3,7 @@
  * https://github.com/bashaus/jquery.oozer.js
  */
 
-(function($) {
+(function ($) {
     'use strict';
 
     /**
@@ -12,7 +12,7 @@
 
     function DEFAULT_sort($a, $b) {
         return parseInt($a.attr('data-'+NS+'-i')) - parseInt($b.attr('data-'+NS+'-i'));
-    }
+    };
 
     /**
      * Detects whether to use CSS animations or to use jQuery
@@ -20,20 +20,28 @@
      */
 
     function DETECT_transitions() {
-        var style = (document.body || document.documentElement).style,
-            p = 'transition';
-
-        if (typeof style[p] == 'string') { return true; }
+        var style = (document.body || document.documentElement).style;
 
         // Tests for vendor specific prop
-        var v = ['Moz', 'webkit', 'Webkit', 'Khtml', 'O', 'ms'];
-        p = p.charAt(0).toUpperCase() + p.substr(1);
+        var prefixes = [
+            'transition',           'MozTransition',
+            'webkitTransition',     'WebkitTransition',
+            'KhtmlTransition',      'OTransition',
+            'msTransition'
+        ];
 
-        for (var i=0; i < v.length; i++) {
-            if (typeof style[v[i] + p] == 'string') { return true; }
+        for (var i in prefixes) {
+            if (typeof style[prefixes[i]] == 'string') { return true; }
         }
 
         return false;
+    };
+
+    /**
+     * Check if the browser supports the history API
+     */
+    function DETECT_history() {
+        return 'history' in window;
     };
 
     /**
@@ -44,48 +52,94 @@
         // E_TRANSITION_END = 'webkitTransitionEnd transitionend oTransitionEnd otransitionend',
         DEFAULT_OPTIONS = {
             elementSelector : '> *',
+
+            // Functions
+            filter          : 'data-oozer-filter',
+            sort            : DEFAULT_sort,
+
+            // Animations
+            cssAnimEnabled  : DETECT_transitions(),
+
             animationSpeed  : 500,
             animationEasing : null,
             resizeSpeed     : 500,
             resizeEasing    : null,
-            filter          : null,
-            sort            : DEFAULT_sort,
-            useTransitions  : DETECT_transitions()
+
+            // History
+            historyEnabled  : DETECT_history(),
+            historyKey      : 'filter'
         },
-        methods = {};
+        DEFAULT_FILTER_OPTIONS = {
+            isAnimated      : true,
+            historyEnabled  : true
+        },
+        methods = {},
+        handlers = {};
+
+    // Global variables
+    $[NS] = {
+        events: {
+            BEFORE_FILTER: 'beforeFilter.'+NS,
+            AFTER_FILTER: 'afterFilter.'+NS
+        }
+    };
 
     /**
      * Initialize a list for oozing
      */
-    methods.init = function(options) {
-        return this.each(function() {
+    methods.init = function (options) {
+        return this.each(function () {
             var $this = $(this);
 
             // Set fallback-options
             options = jQuery.extend({}, DEFAULT_OPTIONS, options);
 
             // Remember the order
-            var $elements = $(options.elementSelector, $this);
-            $elements.each(function(i){
+            $this.find(options.elementSelector).each(function (i) {
                 $(this).attr('data-'+NS+'-i', i);
             });
 
             $this.data(NS, options);
+
+            // If the history API has been enabled, attach events and filter
+            if (options.historyEnabled) {
+                $(window).bind('popstate', $.proxy(handlers.windowPopState, $this));
+
+                // Get filter from the query string on page load
+                var historyFilter = queryString(options.historyKey) || '';
+                $this[NS]('filter', historyFilter, { isAnimated: false, historyEnabled: false });
+            }
         });
-    }
+    };
 
     /**
      * Run the filter on a list
      */
-    methods.filter = function(filterFor) {
-        var $container = $(this),
-            options = $container.data(NS),
-            heightStart = $container.height(),    // Store the Start Height
-            heightCease = 0,
-            transitionElements = [];         // Elements
-        
+    methods.filter = function (filterFor, filterOptions) {
+        var $this = $(this),
+            options = $this.data(NS),
+            filterOptions = jQuery.extend({}, DEFAULT_FILTER_OPTIONS, filterOptions),
+            transitionElements = [],        // Elements
+            heightStart = $this.height(),   // Store the Start Height
+            heightCease = 0;
+
+        // Fire the before filter event
+        var beforeEvent = jQuery.Event($[NS].events.BEFORE_FILTER);
+        beforeEvent[NS] = { filterFor : filterFor };
+        $this.trigger(beforeEvent);
+
+        var afterEvent = jQuery.Event($[NS].events.AFTER_FILTER);
+        afterEvent[NS] = { filterFor : filterFor };
+
+        // If we are using the History API
+        // And this filter request should utilise the History API
+        // Add to push state
+        if (options.historyEnabled && filterOptions.historyEnabled === true) {
+            window.history.pushState(filterFor, null, '?' + options.historyKey + '=' + filterFor);
+        }
+
         // Allow the container to be fluid so set it to auto
-        $container.height('auto');
+        $this.height('auto');
 
         /**
          * Step 1.
@@ -101,7 +155,7 @@
          * Step 2.
          * Store the elements in the transitionElements array
          */
-        $(options.elementSelector, $container).each(function() {
+        $this.find(options.elementSelector).each(function () {
             transitionElements.push(new TransitionElement($(this)));
         });
 
@@ -112,7 +166,7 @@
          * If the element is visible, positionStart is stored as { left : X, top : Y }
          */
 
-        $.each(transitionElements, function(i, transitionElement) {
+        $.each(transitionElements, function (i, transitionElement) {
             var positionStart = null;
 
             if (transitionElement.$target.is(':visible')) {
@@ -128,12 +182,12 @@
          * (They will get shown again before we start animating)
          */
         
-        $.each(transitionElements, function(i, transitionElement) {
+        $.each(transitionElements, function (i, transitionElement) {
             var elementShow = false;
 
             switch (typeof options.filter) {
                 case "function":
-                    elementShow = options.filter.call($container, transitionElement.$target);
+                    elementShow = options.filter.call($this, transitionElement.$target);
                     break;
 
                 case "string":
@@ -156,19 +210,19 @@
 
         if (typeof options.sort === "function") {
             // Sort each of the items 
-            transitionElements.sort(function(a, b) {
+            transitionElements.sort(function (a, b) {
                 return options.sort(a.$target, b.$target);
             });
 
             // Reattach all items to the DOM (to make the ordered)
-            $.each(transitionElements, function(i, transitionElement){
-                transitionElement.$target.detach().appendTo($container);
+            $.each(transitionElements, function (i, transitionElement){
+                transitionElement.$target.detach().appendTo($this);
             });
 
             // Add all hidden items to the end
-            $.each(transitionElements, function(i, transitionElement){
+            $.each(transitionElements, function (i, transitionElement){
                 if (transitionElement.$target.is(':hidden')) {
-                    transitionElement.$target.detach().appendTo($container);
+                    transitionElement.$target.detach().appendTo($this);
                 }
             });
         }
@@ -178,7 +232,7 @@
          * Find out where the new locations are for visible items
          */
 
-        $.each(transitionElements, function(i, transitionElement) {
+        $.each(transitionElements, function (i, transitionElement) {
             var positionCease = null;
 
             if (transitionElement.$target.is(':visible')) {
@@ -187,19 +241,31 @@
 
             transitionElements[i].cease = positionCease;
         });
-        
-        // We also want to store the cease height of the container
-        heightCease = $container.height();
 
-        // And reset it to its original size
-        $container.height(heightStart);
+        /**
+         * If there is no animation, then just return at this point.
+         * Everything is in the right place and nothing more needs to happen.
+         */
+
+        if (filterOptions.isAnimated === false) {
+            // Fire the "after filter" event
+            $this.trigger(afterEvent);
+            return;
+        }        
+        
+        /**
+         * Store the height of the new container and reset its position to the
+         * original height
+         */
+        heightCease = $this.height();
+        $this.height(heightStart);
         
         /**
          * Step 8.
          * Reset the visibility to whatever it was before to get ready for animation
          */
 
-        $.each(transitionElements, function(i, transitionElement) {
+        $.each(transitionElements, function (i, transitionElement) {
             if (transitionElement.start) {
                 transitionElement.$target.css({opacity: 1}).show();
             } else {
@@ -218,8 +284,8 @@
 
         options.$queue = $({});
 
-options.$queue.queue(function(resolve){
-        $.each(transitionElements, function(i, transitionElement) {
+options.$queue.queue(function (resolve){
+        $.each(transitionElements, function (i, transitionElement) {
             if (transitionElement.start) {
                 transitionElement.$target.css({
                     position: 'absolute',
@@ -230,7 +296,7 @@ options.$queue.queue(function(resolve){
         });
 
         if (heightCease > heightStart) {
-            $container.animate(
+            $this.animate(
                 {height : heightCease + "px"}, 
                 options.resizeSpeed, 
                 options.resizeEasing, 
@@ -241,10 +307,10 @@ options.$queue.queue(function(resolve){
         }
 });
 
-options.$queue.queue(function(resolve){
+options.$queue.queue(function (resolve){
         var deferredObjects = [];
 
-        $.each(transitionElements, function(i, transitionElement) {
+        $.each(transitionElements, function (i, transitionElement) {
             var deferred = new $.Deferred();
             deferredObjects.push(deferred.promise());
 
@@ -279,8 +345,8 @@ options.$queue.queue(function(resolve){
                     {opacity : 0},
                     options.animationSpeed, 
                     options.animationEasing,
-                    function() {
-                        transitionElement.$target.detach().appendTo($container);
+                    function () {
+                        transitionElement.$target.detach().appendTo($this);
                         
                         $(this).hide();
                         deferred.resolve();
@@ -316,8 +382,8 @@ options.$queue.queue(function(resolve){
                     {top: 0, left: 0}, 
                     options.animationSpeed, 
                     options.animationEasing, 
-                    function() {
-                        transitionElement.$target.detach().appendTo($container);
+                    function () {
+                        transitionElement.$target.detach().appendTo($this);
                         
                         deferred.resolve();
                     }
@@ -336,9 +402,9 @@ options.$queue.queue(function(resolve){
          * Animate the container the correct height
          */
 
-options.$queue.queue(function(resolve) {
+options.$queue.queue(function (resolve) {
         if (heightStart > heightCease) {
-            $container.animate(
+            $this.animate(
                 {height: heightCease + "px"}, 
                 options.resizeSpeed, 
                 options.resizeEasing,
@@ -355,8 +421,8 @@ options.$queue.queue(function(resolve) {
          * and clean up any outstanding information
          */
 
-options.$queue.promise().always(function() {
-        $.each(transitionElements, function(i, transitionElement) {
+options.$queue.promise().always(function () {
+        $.each(transitionElements, function (i, transitionElement) {
             transitionElement.$target.stop(true, true).css({
                 position: '',
                 top: '',
@@ -365,11 +431,26 @@ options.$queue.promise().always(function() {
             });
         });
 
-        $container.stop(true, true).css({height: ''});
+        $this.stop(true, true).css({height: ''});
+
+        // Fire the "after filter" event
+        $this.trigger(afterEvent);
 });
 
-        $container.data(NS, options);
+        $this.data(NS, options);
     }
+
+    /* Handlers */
+
+    /**
+     * Handle back/forward buttons (history API)
+     */
+    handlers.windowPopState = function (e) {
+        var $this = $(this); // Container
+        var filterVal = e.originalEvent.state || '';
+
+        $this[NS]('filter', filterVal, { historyEnabled : false });
+    };
 
     /* Structs */
 
@@ -381,11 +462,40 @@ options.$queue.promise().always(function() {
 
     /* Helpers */
 
+    /**
+     * Checks to see if a 'word' is contained in a string
+     */
+
     function containsWord(haystack, needle) {
         return (" " + haystack + " ").indexOf(" " + needle + " ") !== -1;
     }
 
-    $.fn[NS] = function(method) {
+    /**
+     * Gets a parameter from the query string
+     */
+
+    function queryString(needle) {
+        var searchText = ('&' + window.location.search.substr(1));
+
+        // Filter on initial load
+        var filterText = '&' + needle + '=';
+        var filterStart = searchText.indexOf(filterText);
+
+        if (filterStart !== -1) {
+            var filterVal = searchText.substr(filterStart + filterText.length);
+            var filterUntil = filterVal.substr(1).indexOf('&');
+
+            if (filterUntil !== -1) {
+                filterVal = filterVal.substr(0, filterUntil + 1);
+            }
+
+            return filterVal;
+        }
+
+        return null;
+    }
+
+    $.fn[NS] = function (method) {
         if (methods[method]) {
             return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
         } else if (typeof method === 'object' || !method) {
