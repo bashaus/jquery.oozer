@@ -6,6 +6,40 @@
 (function($) {
     'use strict';
 
+    /**
+     * Default sorting algorithm
+     */
+
+    function DEFAULT_sort($a, $b) {
+        return parseInt($a.attr('data-'+NS+'-i')) - parseInt($b.attr('data-'+NS+'-i'));
+    }
+
+    /**
+     * Detects whether to use CSS animations or to use jQuery
+     * @return true: CSS; false: jQuery
+     */
+
+    function DETECT_transitions() {
+        var style = (document.body || document.documentElement).style,
+            p = 'transition';
+
+        if (typeof style[p] == 'string') { return true; }
+
+        // Tests for vendor specific prop
+        var v = ['Moz', 'webkit', 'Webkit', 'Khtml', 'O', 'ms'];
+        p = p.charAt(0).toUpperCase() + p.substr(1);
+
+        for (var i=0; i < v.length; i++) {
+            if (typeof style[v[i] + p] == 'string') { return true; }
+        }
+
+        return false;
+    };
+
+    /**
+     * Set defaults
+     */
+
     var NS = 'oozer',
         // E_TRANSITION_END = 'webkitTransitionEnd transitionend oTransitionEnd otransitionend',
         DEFAULT_OPTIONS = {
@@ -15,12 +49,14 @@
             resizeSpeed     : 500,
             resizeEasing    : null,
             filter          : null,
-            sort            : function($a, $b) {
-                return parseInt($a.attr('data-'+NS+'-i')) - parseInt($b.attr('data-'+NS+'-i'));
-            }
+            sort            : DEFAULT_sort,
+            useTransitions  : DETECT_transitions()
         },
         methods = {};
 
+    /**
+     * Initialize a list for oozing
+     */
     methods.init = function(options) {
         return this.each(function() {
             var $this = $(this);
@@ -37,7 +73,10 @@
             $this.data(NS, options);
         });
     }
-    
+
+    /**
+     * Run the filter on a list
+     */
     methods.filter = function(filterFor) {
         var $container = $(this),
             options = $container.data(NS),
