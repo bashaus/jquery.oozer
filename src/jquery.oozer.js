@@ -135,7 +135,8 @@
         // And this filter request should utilise the History API
         // Add to push state
         if (options.historyEnabled && filterOptions.historyEnabled === true) {
-            window.history.pushState(filterFor, null, '?' + options.historyKey + '=' + filterFor);
+            var newQueryString = filterFor !== '' ? options.historyKey + '=' + filterFor : '';
+            window.history.pushState(filterFor, null, '?' + newQueryString);
         }
 
         // Allow the container to be fluid so set it to auto
