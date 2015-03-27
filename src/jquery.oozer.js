@@ -106,7 +106,7 @@
                 $(window).bind('popstate', $.proxy(handlers.windowPopState, $this));
 
                 // Get filter from the query string on page load
-                var historyFilter = queryString(options.historyKey) || '';
+                var historyFilter = getQueryString(null, options.historyKey);
                 $this[NS]('filter', historyFilter, { isAnimated: false, historyEnabled: false });
             }
         });
@@ -475,25 +475,21 @@ options.$queue.promise().always(function () {
      * Gets a parameter from the query string
      */
 
-    function queryString(needle) {
-        var searchText = ('&' + window.location.search.substr(1));
+    function getQueryString(search, parameter)
+    {
+        var queryString = {};
+        search = search || window.location.search;
 
-        // Filter on initial load
-        var filterText = '&' + needle + '=';
-        var filterStart = searchText.indexOf(filterText);
+        search.replace(
+            new RegExp("([^?=&]+)(=([^&]*))?", "g"),
+            function($0, $1, $2, $3) { queryString[$1] = $3; }
+        );
 
-        if (filterStart !== -1) {
-            var filterVal = searchText.substr(filterStart + filterText.length);
-            var filterUntil = filterVal.substr(1).indexOf('&');
-
-            if (filterUntil !== -1) {
-                filterVal = filterVal.substr(0, filterUntil + 1);
-            }
-
-            return filterVal;
+        if (typeof parameter !== 'undefined') {
+            return queryString[parameter] || '';
         }
 
-        return null;
+        return queryString;
     }
 
     $.fn[NS] = function (method) {
