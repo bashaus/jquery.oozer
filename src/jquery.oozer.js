@@ -41,7 +41,7 @@
      * Check if the browser supports the history API
      */
     function DETECT_history() {
-        return 'history' in window;
+        return window.history && typeof window.history.pushState !== 'undefined';
     };
 
     /**
