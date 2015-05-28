@@ -1,4 +1,11 @@
-html { font-family: Georgia; }
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+html {
+    font-family: Georgia;
+    box-sizing: border-box;
+}
 
 .colors {
     position: relative;
@@ -7,12 +14,31 @@ html { font-family: Georgia; }
     padding: 0;
     border: solid 1px #CCC;
     width: 600px;
+
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
+
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+
+    -webkit-align-items: flex-start;
+         -ms-flex-align: start;
+            align-items: flex-start;
+}
+
+.colors li {
+    width: 25%;
 }
 
 .colors li {
     display: block;
     list-style-type: none;
-    width: 130px;
     line-height: 20px;
     padding: 10px;
     text-align: center;
@@ -24,6 +50,7 @@ html { font-family: Georgia; }
     width: 20px;
     height: 20px;
     margin: 0 auto;
+
     -webkit-border-radius: 10px;
        -moz-border-radius: 10px;
             border-radius: 10px;
@@ -58,8 +85,3 @@ html { font-family: Georgia; }
 .colors li.teal:before       { background-color: #0389ac; }
 .colors li.sky:before        { background-color: #0d8bc6; }
 .colors li.turquoise:before  { background-color: #00b2b5; }
-
-.oozer-shown  { display: block; }
-.oozer-show   { display: block; opacity: 1; transform: scale(1); }
-.oozer-hide   { display: block; opacity: 0; transform: scale(0); }
-.oozer-hidden { display: none; }

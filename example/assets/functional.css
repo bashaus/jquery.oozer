@@ -1,0 +1,14 @@
+.oozer-container {
+    -webkit-transition: height .5s;
+            transition: height .5s;
+}
+
+.oozer-container li {
+    -webkit-transition: top .5s, left .5s;
+            transition: top .5s, left .5s;
+}
+
+.oozer-shown  { display: block; }
+.oozer-show   { display: block; opacity: 1; transform: scale(1); }
+.oozer-hide   { display: block; opacity: 0; transform: scale(0); }
+.oozer-hidden { display: none; }

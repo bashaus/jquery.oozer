@@ -2,15 +2,8 @@
 <html>
 <head>
 <title>jQuery.oozer</title>
-
-<!--[if (IE)&!(IEMobile)]> 
-<link rel="stylesheet" type="text/css" href="assets/ie.css" />
-<![endif]--> 
-
-<!--[if (IEMobile)|!(IE)]> -->
-<link rel="stylesheet" type="text/css" href="assets/responsive.css" />
-<!-- <![endif]-->
-
+<link rel="stylesheet" type="text/css" href="assets/functional.css" />
+<link rel="stylesheet" type="text/css" href="assets/presentational.css" />
 </head>
 <body>
 <form method="get">
@@ -28,7 +21,7 @@
 </form>
 
 <h2>Colors</h2>
-<ul id="oozer-list" class="colors">
+<ul id="colors" class="oozer-container colors">
     <li data-oozer-filter="red" class="maraschino">Maraschino</li>
     <li data-oozer-filter="red" class="cayenne">Cayenne</li>
     <li data-oozer-filter="purple" class="maroon">Maroon</li>
@@ -64,15 +57,18 @@
 <script type="text/javascript" src="../src/jquery.oozer.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
+    var $list = $("#colors");
+
     $('input[name="oozer-filter"]').click(function() {
-        $("#oozer-list").oozer('filter', $(this).val());
+        $list.oozer("filter", $(this).val());
     });
 
-    $('#oozer-list').oozer()
-        .bind('beforeFilter.oozer', function(e) {
+    $list.oozer()
+        .bind("beforeFilter.oozer", function(e) {
             $('input[name="oozer-filter"]').each(function() { 
-                if (this.getAttribute('value') == e.oozer.filterFor) {
-                    this.checked = true;
+                var $this = $(this);
+                if ($this.attr("value") == e.oozer.filterFor) {
+                    $this.prop("checked", true);
                 }
             });
         });

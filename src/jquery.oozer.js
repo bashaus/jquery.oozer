@@ -14,6 +14,20 @@
         return parseInt($a.attr('data-'+NS+'-i')) - parseInt($b.attr('data-'+NS+'-i'));
     };
 
+
+    var STYLES_TRANSITION = [
+        'transition',           'MozTransition',
+        'webkitTransition',     'WebkitTransition',
+        'KhtmlTransition',      'OTransition',
+        'msTransition'
+    ];
+
+    var EVENTS_TRANSITION_END = [
+        'webkitTransitionEnd', 'msTransitionEnd', 
+        'otransitionend', 'oTransitionEnd',
+        'transitionend'
+    ];
+
     /**
      * Detects whether to use CSS animations or to use jQuery
      * @return true: CSS; false: jQuery
@@ -22,16 +36,8 @@
     function DETECT_transitions() {
         var style = (document.body || document.documentElement).style;
 
-        // Tests for vendor specific prop
-        var prefixes = [
-            'transition',           'MozTransition',
-            'webkitTransition',     'WebkitTransition',
-            'KhtmlTransition',      'OTransition',
-            'msTransition'
-        ];
-
-        for (var i in prefixes) {
-            if (typeof style[prefixes[i]] == 'string') { return true; }
+        for (var i in STYLES_TRANSITION) {
+            if (typeof style[STYLES_TRANSITION[i]] == 'string') { return true; }
         }
 
         return false;
@@ -49,7 +55,6 @@
      */
 
     var NS = 'oozer',
-        // E_TRANSITION_END = 'webkitTransitionEnd transitionend oTransitionEnd otransitionend',
         DEFAULT_OPTIONS = {
             elementSelector : '> *',
 
@@ -72,9 +77,7 @@
         DEFAULT_FILTER_OPTIONS = {
             isAnimated      : true,
             historyEnabled  : true
-        },
-        methods = {},
-        handlers = {};
+        };
 
     // Global variables
     $[NS] = {
@@ -84,361 +87,384 @@
         }
     };
 
-    /**
-     * Initialize a list for oozing
-     */
-    methods.init = function (options) {
-        return this.each(function () {
+    function Oozer () {
+        this.$queue = undefined;
+        this.options = {};
+
+        /**
+         * Initialize a list for oozing
+         */
+        this.init = function (options) {
             var $this = $(this);
 
             // Set fallback-options
-            options = jQuery.extend({}, DEFAULT_OPTIONS, options);
+            this.options = $.extend({}, DEFAULT_OPTIONS, options);
 
             // Remember the order
-            $this.find(options.elementSelector).each(function (i) {
+            $this.find(this.options.elementSelector).each(function (i) {
                 $(this).attr('data-'+NS+'-i', i);
             });
 
-            $this.data(NS, options);
-
             // If the history API has been enabled, attach events and filter
-            if (options.historyEnabled) {
-                $(window).bind('popstate', $.proxy(handlers.windowPopState, $this));
+            if (this.options.historyEnabled) {
+                $(window).on('popstate', $.proxy(handlerWindowPopState, $this));
 
                 // Get filter from the query string on page load
-                var historyFilter = getQueryString(null, options.historyKey);
+                var historyFilter = getQueryString(null, this.options.historyKey);
                 $this[NS]('filter', historyFilter, { isAnimated: false, historyEnabled: false });
             }
-        });
-    };
-
-    /**
-     * Run the filter on a list
-     */
-    methods.filter = function (filterFor, filterOptions) {
-        var $this = $(this),
-            options = $this.data(NS),
-            filterOptions = jQuery.extend({}, DEFAULT_FILTER_OPTIONS, filterOptions),
-            transitionElements = [],        // Elements
-            heightStart = $this.height(),   // Store the Start Height
-            heightCease = 0;
-
-        // Fire the before filter event
-        var beforeEvent = jQuery.Event($[NS].events.BEFORE_FILTER);
-        beforeEvent[NS] = { filterFor : filterFor };
-        $this.trigger(beforeEvent);
-
-        var afterEvent = jQuery.Event($[NS].events.AFTER_FILTER);
-        afterEvent[NS] = { filterFor : filterFor };
-
-        // If we are using the History API
-        // And this filter request should utilise the History API
-        // Add to push state
-        if (options.historyEnabled && filterOptions.historyEnabled === true) {
-            var newQueryString = filterFor !== '' ? options.historyKey + '=' + filterFor : '';
-            window.history.pushState(filterFor, null, '?' + newQueryString);
-        }
-
-        // Allow the container to be fluid so set it to auto
-        $this.height('auto');
+        };
 
         /**
-         * Step 1.
-         * Stop any previous animations
+         * Run the filter on a list
          */
+        this.filter = function (filterFor, filterOptions) {
+            var $this = $(this),
+                filterOptions = jQuery.extend({}, DEFAULT_FILTER_OPTIONS, filterOptions),
+                transitionElements = [],        // Elements
+                heightStart = $this.height(),   // Store the Start Height
+                heightCease = 0;
 
-        // $elements.unbind(E_TRANSITION_END);
-        if (typeof options.$queue !== "undefined") {
-            options.$queue.stop(true, true);
-        }
+            // Fire the before filter event
+            var beforeEvent = jQuery.Event($[NS].events.BEFORE_FILTER);
+            beforeEvent[NS] = { filterFor : filterFor };
+            $this.trigger(beforeEvent);
 
-        /**
-         * Step 2.
-         * Store the elements in the transitionElements array
-         */
-        $this.find(options.elementSelector).each(function () {
-            transitionElements.push(new TransitionElement($(this)));
-        });
+            var afterEvent = jQuery.Event($[NS].events.AFTER_FILTER);
+            afterEvent[NS] = { filterFor : filterFor };
 
-        /**
-         * Step 3.
-         * Find out where everything is now and store it as data in a variable called "positionStart"
-         * If the element is hidden, positionStart is NULL
-         * If the element is visible, positionStart is stored as { left : X, top : Y }
-         */
-
-        $.each(transitionElements, function (i, transitionElement) {
-            var positionStart = null;
-
-            if (transitionElement.$target.is(':visible')) {
-                positionStart = transitionElement.$target.position();
+            // If we are using the History API
+            // And this filter request should utilise the History API
+            // Add to push state
+            if (this.options.historyEnabled && filterOptions.historyEnabled === true) {
+                var newQueryString = filterFor !== '' ? this.options.historyKey + '=' + filterFor : '';
+                window.history.pushState(filterFor, null, '?' + newQueryString);
             }
 
-            transitionElements[i].start = positionStart;
-        });
+            // Allow the container to be fluid so set it to auto
+            $this.height('auto');
 
-        /**
-         * Step 4. 
-         * Apply the filter by hiding the items which will not be shown
-         * (They will get shown again before we start animating)
-         */
-        
-        $.each(transitionElements, function (i, transitionElement) {
-            var elementShow = false;
+            /**
+             * Step 1.
+             * Stop any previous animations
+             */
 
-            switch (typeof options.filter) {
-                case "function":
-                    elementShow = options.filter.call($this, transitionElement.$target);
-                    break;
+            // $elements.unbind(E_TRANSITION_END);
+            if (typeof this.$queue !== "undefined") {
+                this.$queue.stop(true, true);
+            }
 
-                case "string":
-                    if (filterFor == "") {
-                        elementShow = true;
-                    } else if (containsWord(transitionElement.$target.attr(options.filter), filterFor)) {
-                        elementShow = true;
+            /**
+             * Step 2.
+             * Store the elements in the transitionElements array
+             */
+            $this.find(this.options.elementSelector).each(function () {
+                transitionElements.push(new TransitionElement($(this)));
+            });
+
+            /**
+             * Step 3.
+             * Find out where everything is now and store it as data in a variable called "positionStart"
+             * If the element is hidden, positionStart is NULL
+             * If the element is visible, positionStart is stored as { left : X, top : Y }
+             */
+
+            $.each(transitionElements, function (i, transitionElement) {
+                var positionStart = null;
+
+                if (transitionElement.$target.is(':visible')) {
+                    positionStart = transitionElement.$target.position();
+                }
+
+                transitionElements[i].start = positionStart;
+            });
+
+            /**
+             * Step 4. 
+             * Apply the filter by hiding the items which will not be shown
+             * (They will get shown again before we start animating)
+             */
+            
+            $.each(transitionElements, $.proxy(function (i, transitionElement) {
+                var elementShow = false;
+
+                switch (typeof this.options.filter) {
+                    case "function":
+                        elementShow = this.options.filter.call($this, transitionElement.$target);
+                        break;
+
+                    case "string":
+                        if (filterFor == "") {
+                            elementShow = true;
+                        } else if (containsWord(transitionElement.$target.attr(this.options.filter), filterFor)) {
+                            elementShow = true;
+                        }
+
+                        break;
+                }
+
+                transitionElement.$target[elementShow ? 'show' : 'hide']();
+            }, this));
+
+            /**
+             * Step 5. 
+             * Sort the elements (helps for nth-child)
+             */
+
+            if (typeof this.options.sort === "function") {
+                // Sort each of the items 
+                transitionElements.sort($.proxy(function (a, b) {
+                    return this.options.sort(a.$target, b.$target);
+                }, this));
+
+                // Reattach all items to the DOM (to make the ordered)
+                $.each(transitionElements, $.proxy(function (i, transitionElement){
+                    transitionElement.$target.detach().appendTo($this);
+                }, this));
+
+                // Add all hidden items to the end
+                $.each(transitionElements, $.proxy(function (i, transitionElement){
+                    if (transitionElement.$target.is(':hidden')) {
+                        transitionElement.$target.detach().appendTo($this);
+                    }
+                }, this));
+            }
+
+            /**
+             * Step 7.
+             * Find out where the new locations are for visible items
+             */
+
+            $.each(transitionElements, $.proxy(function (i, transitionElement) {
+                var positionCease = null;
+
+                if (transitionElement.$target.is(':visible')) {
+                    positionCease = transitionElement.$target.position();
+                }
+
+                transitionElements[i].cease = positionCease;
+            }, this));
+
+            /**
+             * If there is no animation, then just return at this point.
+             * Everything is in the right place and nothing more needs to happen.
+             */
+
+            if (filterOptions.isAnimated === false) {
+                // Fire the "after filter" event
+                $this.trigger(afterEvent);
+                return;
+            }        
+            
+            /**
+             * Store the height of the new container and reset its position to the
+             * original height
+             */
+            heightCease = $this.height();
+            $this.height(heightStart);
+            
+            /**
+             * Step 8.
+             * Reset the visibility to whatever it was before to get ready for animation
+             */
+
+            $.each(transitionElements, $.proxy(function (i, transitionElement) {
+                if (transitionElement.start) {
+                    transitionElement.$target.css({
+                        position: 'absolute',
+                        top: transitionElement.start.top,
+                        left: transitionElement.start.left,
+                        opacity: 1
+                    }).show();
+                } else {
+                    transitionElement.$target.css({opacity: 0}).hide();
+                }
+            }, this));
+
+            /**
+             * Step 9.
+             * Setup the animation queue
+             */
+
+            this.$queue = $({});
+
+this.$queue.queue($.proxy(function (resolve) {
+            if (heightCease <= heightStart) {
+                return resolve();
+            }
+
+            if (this.options.cssAnimEnabled) {
+                $this
+                    .one(EVENTS_TRANSITION_END.join(' '), resolve)
+                    .css('height', heightCease + "px");
+            } else {
+                $this.animate(
+                    { height : heightCease + "px" }, 
+                    this.options.resizeSpeed, 
+                    this.options.resizeEasing, 
+                    resolve
+                );
+            }
+}, this));
+
+
+            /**
+             * Step 10. 
+             * Start the animations - this can occur in one of four ways
+             * CASE 1: HIDDEN to POSITION   - Fade in at the location position cease
+             * CASE 2: POSITION to HIDDEN   - Fade out at the location position start
+             * CASE 3: POSITION to POSITION - Shuffle the item to a new location
+             * CASE 4: HIDDEN to HIDDEN     - Do nothing
+             */
+
+this.$queue.queue($.proxy(function (resolve) {
+            var deferredObjects = [];
+
+            $.each(transitionElements, $.proxy(function (i, transitionElement) {
+                var deferred = new $.Deferred();
+                deferredObjects.push(deferred.promise());
+
+                // Animations require everything to be position absolute
+                transitionElement.$target.css({position: 'absolute'});
+                
+                // Check for CASE 1: HIDDEN to POSITION
+                if (!transitionElement.start && transitionElement.cease) {
+                    transitionElement.$target.css({
+                        top: transitionElement.cease.top,
+                        left: transitionElement.cease.left
+                    }).show();
+
+                    transitionElement.$target.animate(
+                        {opacity : 1},
+                        this.options.animationSpeed, 
+                        this.options.animationEasing,
+                        deferred.resolve
+                    );
+                    
+                    return;
+                }
+
+                // Check for CASE 2: POSITION to HIDDEN
+                if (transitionElement.start && !transitionElement.cease) {
+                    transitionElement.$target.css({
+                        top: transitionElement.start.top,
+                        left: transitionElement.start.left
+                    });
+                    
+                    transitionElement.$target.animate(
+                        {opacity : 0},
+                        this.options.animationSpeed, 
+                        this.options.animationEasing,
+                        function () {
+                            transitionElement.$target
+                                .hide()
+                                .detach()
+                                .appendTo($this);
+
+                            deferred.resolve();
+                        }
+                    );
+                    
+                    return;
+                }
+                
+                // Check for CASE 3: POSITION to POSITION
+                if (transitionElement.start && transitionElement.cease) {
+                    transitionElement.$target.css({
+                        top: transitionElement.start.top,
+                        left: transitionElement.start.left
+                    });
+
+                    if (transitionElement.isSame()) {
+                        deferred.resolve();
+                        return;
+                    }
+                    
+                    if (this.options.cssAnimEnabled) {
+                        transitionElement.$target
+                            .one(EVENTS_TRANSITION_END.join(' '), deferred.resolve)
+                            .css({
+                                top : transitionElement.cease.top,
+                                left : transitionElement.cease.left
+                            });
+                    } else {
+                        transitionElement.$target.animate(
+                            {
+                                top : transitionElement.cease.top,
+                                left : transitionElement.cease.left
+                            },
+                            this.options.animationSpeed, 
+                            this.options.animationEasing, 
+                            deferred.resolve
+                        );
                     }
 
-                    break;
-            }
-
-            transitionElement.$target[elementShow ? 'show' : 'hide']();
-        });
-
-        /**
-         * Step 5. 
-         * Sort the elements (helps for nth-child)
-         */
-
-        if (typeof options.sort === "function") {
-            // Sort each of the items 
-            transitionElements.sort(function (a, b) {
-                return options.sort(a.$target, b.$target);
-            });
-
-            // Reattach all items to the DOM (to make the ordered)
-            $.each(transitionElements, function (i, transitionElement){
-                transitionElement.$target.detach().appendTo($this);
-            });
-
-            // Add all hidden items to the end
-            $.each(transitionElements, function (i, transitionElement){
-                if (transitionElement.$target.is(':hidden')) {
-                    transitionElement.$target.detach().appendTo($this);
+                    return;
                 }
-            });
-        }
 
-        /**
-         * Step 7.
-         * Find out where the new locations are for visible items
-         */
+                // Check for CASE 4: HIDDEN to HIDDEN
+                if (!transitionElement.start && !transitionElement.cease) {
+                    transitionElement.$target
+                        .css({position: 'relative'})
+                        .detach()
+                        .appendTo($this);
 
-        $.each(transitionElements, function (i, transitionElement) {
-            var positionCease = null;
+                        deferred.resolve();
 
-            if (transitionElement.$target.is(':visible')) {
-                positionCease = transitionElement.$target.position();
+                    return;
+                }
+            }, this));
+
+            return $.when.apply($, deferredObjects)
+                .done(resolve);
+}, this));
+            
+            /**
+             * Step 11.
+             * Animate the container the correct height
+             */
+
+this.$queue.queue($.proxy(function (resolve) {
+            if (heightStart == heightCease) {
+                return resolve();
             }
 
-            transitionElements[i].cease = positionCease;
-        });
+            if (this.options.cssAnimEnabled) {
+                $this
+                    .one(EVENTS_TRANSITION_END.join(' '), resolve)
+                    .css('height', heightCease + "px");
+            } else {
+                $this.animate(
+                    {height : heightCease + "px"}, 
+                    this.options.resizeSpeed, 
+                    this.options.resizeEasing, 
+                    resolve
+                );
+            }
+}, this));
 
-        /**
-         * If there is no animation, then just return at this point.
-         * Everything is in the right place and nothing more needs to happen.
-         */
+            /**
+             * Step 12.
+             * Settle the elements into their place after all animations are complete
+             * and clean up any outstanding information
+             */
 
-        if (filterOptions.isAnimated === false) {
+this.$queue.promise().always($.proxy(function () {
+            $.each(transitionElements, $.proxy(function (i, transitionElement) {
+                transitionElement.$target.stop(true, true).css({
+                    position: '',
+                    top: '',
+                    left: '',
+                    opacity: ''
+                });
+            }, this));
+
+            $this.stop(true, true).css({height: ''});
+
             // Fire the "after filter" event
             $this.trigger(afterEvent);
-            return;
-        }        
-        
-        /**
-         * Store the height of the new container and reset its position to the
-         * original height
-         */
-        heightCease = $this.height();
-        $this.height(heightStart);
-        
-        /**
-         * Step 8.
-         * Reset the visibility to whatever it was before to get ready for animation
-         */
-
-        $.each(transitionElements, function (i, transitionElement) {
-            if (transitionElement.start) {
-                transitionElement.$target.css({opacity: 1}).show();
-            } else {
-                transitionElement.$target.css({opacity: 0}).hide();
-            }
-        });
-
-        /**
-         * Step 9. 
-         * Start the animations - this can occur in one of four ways
-         * CASE 1: HIDDEN to POSITION   - Fade in at the location position cease
-         * CASE 2: POSITION to HIDDEN   - Fade out at the location position start
-         * CASE 3: POSITION to POSITION - Shuffle the item to a new location
-         * CASE 4: HIDDEN to HIDDEN     - Do nothing
-         */
-
-        options.$queue = $({});
-
-options.$queue.queue(function (resolve){
-        $.each(transitionElements, function (i, transitionElement) {
-            if (transitionElement.start) {
-                transitionElement.$target.css({
-                    position: 'absolute',
-                    top: transitionElement.start.top,
-                    left: transitionElement.start.left
-                });
-            }
-        });
-
-        if (heightCease > heightStart) {
-            $this.animate(
-                {height : heightCease + "px"}, 
-                options.resizeSpeed, 
-                options.resizeEasing, 
-                resolve
-            );
-        } else {
-            resolve();
+}, this));
         }
-});
-
-options.$queue.queue(function (resolve){
-        var deferredObjects = [];
-
-        $.each(transitionElements, function (i, transitionElement) {
-            var deferred = new $.Deferred();
-            deferredObjects.push(deferred.promise());
-
-            // Animations require everything to be position absolute
-            transitionElement.$target.css({position: 'absolute'});
-            
-            // Check for CASE 1: HIDDEN to POSITION
-            if (!transitionElement.start && transitionElement.cease) {
-                transitionElement.$target.css({
-                    top: transitionElement.cease.top,
-                    left: transitionElement.cease.left
-                }).show();
-                
-                transitionElement.$target.animate(
-                    {opacity : 1},
-                    options.animationSpeed, 
-                    options.animationEasing,
-                    deferred.resolve
-                );
-                
-                return;
-            }
-
-            // Check for CASE 2: POSITION to HIDDEN
-            if (transitionElement.start && !transitionElement.cease) {
-                transitionElement.$target.css({
-                    top: transitionElement.start.top,
-                    left: transitionElement.start.left
-                });
-                
-                transitionElement.$target.animate(
-                    {opacity : 0},
-                    options.animationSpeed, 
-                    options.animationEasing,
-                    function () {
-                        transitionElement.$target.detach().appendTo($this);
-                        
-                        $(this).hide();
-                        deferred.resolve();
-                    }
-                );
-                
-                return;
-            }
-            
-            // Check for CASE 3: POSITION to POSITION
-            if (transitionElement.start && transitionElement.cease) {
-                transitionElement.$target.css({
-                    top: transitionElement.start.top,
-                    left: transitionElement.start.left
-                });
-
-                transitionElement.$target.animate(
-                    {
-                        top : transitionElement.cease.top,
-                        left : transitionElement.cease.left
-                    },
-                    options.animationSpeed, 
-                    options.animationEasing, 
-                    deferred.resolve
-                );
-
-                return;
-            }
-            
-            // Check for CASE 4: HIDDEN to HIDDEN
-            if (!transitionElement.start && !transitionElement.cease) {
-                transitionElement.$target.css({position: 'relative'}).animate(
-                    {top: 0, left: 0}, 
-                    options.animationSpeed, 
-                    options.animationEasing, 
-                    function () {
-                        transitionElement.$target.detach().appendTo($this);
-                        
-                        deferred.resolve();
-                    }
-                );
-
-                return;
-            }
-        });
-
-        return $.when.apply($, deferredObjects)
-            .done(resolve);
-});
-        
-        /**
-         * Step 10.
-         * Animate the container the correct height
-         */
-
-options.$queue.queue(function (resolve) {
-        if (heightStart > heightCease) {
-            $this.animate(
-                {height: heightCease + "px"}, 
-                options.resizeSpeed, 
-                options.resizeEasing,
-                resolve
-            );
-        } else {
-            resolve();
-        }
-});
-
-        /**
-         * Step 11.
-         * Settle the elements into their place after all animations are complete
-         * and clean up any outstanding information
-         */
-
-options.$queue.promise().always(function () {
-        $.each(transitionElements, function (i, transitionElement) {
-            transitionElement.$target.stop(true, true).css({
-                position: '',
-                top: '',
-                left: '',
-                opacity: ''
-            });
-        });
-
-        $this.stop(true, true).css({height: ''});
-
-        // Fire the "after filter" event
-        $this.trigger(afterEvent);
-});
-
-        $this.data(NS, options);
     }
 
     /* Handlers */
@@ -446,7 +472,7 @@ options.$queue.promise().always(function () {
     /**
      * Handle back/forward buttons (history API)
      */
-    handlers.windowPopState = function (e) {
+    function handlerWindowPopState (e) {
         var $this = $(this); // Container
         var filterVal = e.originalEvent.state || '';
 
@@ -459,6 +485,22 @@ options.$queue.promise().always(function () {
         this.$target = $target;
         this.start = null;
         this.cease = null;
+
+        this.isSame = function () {
+            if (typeof this.start != typeof this.cease) {
+                return false;
+            }
+
+            if (this.start.top != this.cease.top) {
+                return false;
+            }
+
+            if (this.start.left != this.cease.left) {
+                return false;
+            }
+
+            return true;
+        }
     }
 
     /* Helpers */
@@ -493,12 +535,27 @@ options.$queue.promise().always(function () {
     }
 
     $.fn[NS] = function (method) {
-        if (methods[method]) {
-            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-        } else if (typeof method === 'object' || !method) {
-            return methods.init.apply(this, arguments);
-        } else {
-            $.error('jQuery.' + NS + ': method ' +  method + ' does not exist');
-        }
+        var args = arguments;
+        return this.each(function () {
+            var $this = $(this),
+                object = $this.data(NS);
+
+            if (!object) {
+                if (typeof method === 'object' || !method) {
+                    object = new Oozer;
+                    $this.data(NS, object);
+
+                    return object.init.apply(this, args);
+                } else {
+                    $.error('jQuery.' + NS + ': target not initialized');
+                }
+            } else {
+                if (object[method]) {
+                    return object[method].apply(this, Array.prototype.slice.call(args, 1));
+                } else {
+                    $.error('jQuery.' + NS + ': method ' +  method + ' does not exist');
+                }
+            }
+        });
     };
 })(jQuery);
