@@ -63,15 +63,15 @@ $(document).ready(function() {
         $list.oozer("filter", $(this).val());
     });
 
-    $list.oozer()
-        .bind("beforeFilter.oozer", function(e) {
-            $('input[name="oozer-filter"]').each(function() { 
-                var $this = $(this);
-                if ($this.attr("value") == e.oozer.filterFor) {
-                    $this.prop("checked", true);
-                }
-            });
+    $list.bind("beforeFilter.oozer", function(e) {
+        $('input[name="oozer-filter"]').each(function() { 
+            var $this = $(this);
+            if ($this.attr("value") == e.oozer.filterFor) {
+                $this.prop("checked", true);
+            }
         });
+    })
+    .oozer();
 });
 </script>
 </body>
